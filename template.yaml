@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  layers
+
+  Sample SAM Template for layers
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  lambdaTelemetria:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: lambdaTelemetria
+      Handler: telemetria/app.lambdaHandler
+      Layers:
+        - !Ref Firebasetools
+      Runtime: nodejs14.x
+      Events:
+        IotOperacion:
+          Type: IoTRule
+          Properties:
+            Sql: SELECT * , topic() as topico FROM '+/+/+/+/operacion'
+        IotSeteo:
+          Type: IoTRule
+          Properties:
+            Sql: SELECT * , topic() as topico FROM '+/+/+/+/seteo'
+        IotConfiguracion:
+          Type: IoTRule
+          Properties:
+            Sql: SELECT * , topic() as topico FROM '+/+/+/+/configuracion'
+        IotFalla:
+          Type: IoTRule
+          Properties:
+            Sql: SELECT * , topic() as topico FROM '+/+/+/+/falla'
+
+  Firebasetools:
+        Type: AWS::Serverless::LayerVersion
+        Properties:
+            LayerName: firebase-dep
+            Description: Dependencies for sam app [firebase]
+            ContentUri: dependencies/
+            CompatibleRuntimes:
+              - nodejs14.x
+            LicenseInfo: 'MIT'
+            RetentionPolicy: Retain
